@@ -40,6 +40,7 @@ local Auto_Heal_Threshold = 199
 local Show_Hitbox_State = false
 local Hitbox_Teleport_State = false
 
+local Auto_Pickup_Keybind = false
 local Auto_Pickup_State = false
 
 --// AUTO FARM FUNCTIONS & TABLES //--
@@ -232,18 +233,7 @@ end
 
 local function Auto_Pickup()
 	while Auto_Pickup_State do
-		local Character = Player.Character or Player.CharacterAdded:Wait()
-		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
-		local Pickup = false
-		for _, Item in pairs(Workspace_Service.Resources.LootDrops:GetChildren()) do
-			local Distance = (Humanoid_Root_Part.Position - Item.LootBeam.Position).Magnitude
-			if Distance < 10 then
-				Pickup = true
-			end
-		end
-		if Pickup then
-			keypress(0x45)
-		end
+		keypress(0x45)
 		task.wait(.1)
 	end
 end
@@ -299,8 +289,12 @@ General_Misc:NewToggle("Uncap Max Zoom Distance", "Off = 50 | On = 100000", func
 end)
 
 General_Misc:NewToggle("Auto Pickup", "Will Spam E If Close To Loot Drop", function(State)
-	Auto_Pickup_State = State
-	if State then
+	Auto_Pickup_Keybind = State
+end)
+
+General_Misc:NewKeybind("Auto Pickup Keybind", "Sets A Keybind To Auto Pickup", Enum.KeyCode.F1, function()
+	if Auto_Pickup_Keybind then
+		Auto_Pickup_State = not Auto_Pickup_State
 		Auto_Pickup()
 	end
 end)
