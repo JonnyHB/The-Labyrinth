@@ -278,22 +278,6 @@ end)
 
 --// PVP FUNCTIONS & TABLES //--
 
-local function Get_Closest_Player()
-	local Character = Player.Character or Player.CharacterAdded:Wait()
-	local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
-	local Closest_Player = nil
-	local Closest_Distance = math.huge
-	for Index, Target in pairs(Players_Service:GetChildren()) do
-		if Target.Name ~= Player.Name and Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
-			local Distance = (Humanoid_Root_Part.Position - Target.Character.HumanoidRootPart.Position).Magnitude
-			if Distance < Closest_Distance then
-				Closest_Player = Target
-			end
-		end
-	end
-	return Closest_Player
-end
-
 local function Start_Auto_Heal()
 	local Inventory_Interaction_Event = Replicated_Storage.Resources.Data.Events.Traffic.InventoryInteraction
 	while Auto_Heal_State do
@@ -327,7 +311,18 @@ end
 
 local function Teleport_Hitbox()
 	while Hitbox_Teleport_State do
-		local Closest_Player = Get_Closest_Player()
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+		local Closest_Player = nil
+		local Closest_Distance = math.huge
+		for Index, Target in pairs(Players_Service:GetChildren()) do
+			if Target.Name ~= Player.Name and Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
+				local Distance = (Humanoid_Root_Part.Position - Target.Character.HumanoidRootPart.Position).Magnitude
+				if Distance < Closest_Distance then
+					Closest_Player = Target
+				end
+			end
+		end
 		if Closest_Player ~= nil then
 			local Character = Player.Character or Player.CharacterAdded:Wait()
 			if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
