@@ -201,25 +201,36 @@ local function Start_Boss_Auto_Farm()
 				
 				while Boss.Humanoid.Health > 0 do
 					
-					print("started")
+					print("0")
 					
 					local Boss_Position = Boss.HumanoidRootPart.Position
 					local Boss_Forward_Vector = Boss.HumanoidRootPart.LookVector
 					
+					print("1")
+					
 					local Target_Position = Boss_Position - Boss_Forward_Vector * Auto_Farm_Boss_Distance
+					
+					print("2")
 					
 					local Target_CFrame = CFrame.new(Target_Position)
 					
+					print("3")
+					
 					local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Target_Position + Vector3.new(0, Auto_Farm_Boss_Offset, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Target_CFrame * CFrame.new(0, Auto_Farm_Boss_Offset, 0)})
+					
+					print("4")
+					
 					Tween_Character:Play()
 					
-					task.wait(.2)
+					print("5")
+					
+					task.wait(1)
 					
 					Tween_Character:Stop()
 					
 					task.wait()
 					
-					print("ended")
+					print("6")
 					
 				end
 				
