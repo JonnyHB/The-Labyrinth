@@ -40,6 +40,8 @@ local Auto_Heal_Threshold = 199
 local Show_Hitbox_State = false
 local Hitbox_Teleport_State = false
 
+local Auto_Pickup_State = false
+
 --// AUTO FARM FUNCTIONS & TABLES //--
 
 local function Start_Auto_Farm()
@@ -226,6 +228,22 @@ local function Platty_Daddy(Position)
 
 end
 
+--// GENERAL FUNCTIONS & TABLES //--
+
+local function Auto_Pickup()
+	while Auto_Pickup_State do
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+		for _, Item in pairs(Workspace_Service.Resources.LootDrops:GetChildren()) do
+			local Distance = (Humanoid_Root_Part.Position - Item.LootBeam.Position).Magnitude
+			if Distance < 10 then
+				keypress(0x45)
+			end
+		end
+		task.wait(.1)
+	end
+end
+
 --// GENERAL TAB //--
 
 local General_Tab = Window:NewTab("General")
@@ -273,6 +291,13 @@ General_Misc:NewToggle("Uncap Max Zoom Distance", "Off = 50 | On = 100000", func
 		Player.CameraMaxZoomDistance = 100000
 	else
 		Player.CameraMaxZoomDistance = 50
+	end
+end)
+
+General_Misc:NewToggle("Auto Pickup", "Will Spam E If Close To Loot Drop", function(State)
+	Auto_Pickup_State = State
+	if State then
+		Auto_Pickup()
 	end
 end)
 
