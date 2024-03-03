@@ -1,0 +1,289 @@
+print("The Labyrinth | Fuck Script")
+task.wait()
+
+--// SERVICES //--
+
+local Players_Service = game:GetService("Players")
+local Tween_Service = game:GetService("TweenService")
+local Workspace_Service = game:GetService("Workspace")
+local Replicated_Storage = game:GetService("ReplicatedStorage")
+
+--// PLAYER VARIABLES //--
+
+local Player = Players_Service.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+
+--// LIBRARY //--
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+local Window = Library.CreateLib("The Labyrinth | Fuck Script", "DarkTheme")
+
+--// LIBRARY DATA //--
+
+local Location = "Glade"
+local Farm = "Ores"
+
+local Speed_Offset = 70
+local Platform_Offset = 3.3
+
+local Farm_State = false
+local Farming = false
+
+local Platform_Name = nil
+
+--// AUTO FARM FUNCTIONS & TABLES //--
+local function Start_Auto_Farm()
+	
+	while Farm_State do
+		
+		Farming = true
+
+		--// EMPTY VARIABLES //--
+
+		local CFrame_Character
+		local Vector_Character
+
+		local Vector_Platform
+
+		local Stop_Time
+
+		--// SCRIPT VARIABLES //--
+
+		local Gear_Event = Replicated_Storage.Resources.Data.Events.Traffic.Gear
+
+		local Farm_Path = Workspace_Service.Resources:FindFirstChild(Location):FindFirstChild(Farm)
+
+		local Finished = false
+
+		--// PLATFORM SETUP //--
+
+		local Platform = Instance.new("Part")
+		Platform.Color = Color3.fromRGB(255, 0, 0)
+		Platform.Transparency = .5
+		Platform.Name = tostring(math.random(1000000000,9999999999))
+		Platform.Size = Vector3.new(20, .5, 20)
+		Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
+		Platform.Anchored = true
+		Platform.Parent = Workspace_Service
+
+		--// FUNCTIONS //--
+
+		local function Get_Closest()
+
+			local Farm_Distance = math.huge
+			local Closest_Model = nil
+
+			for i, Model in pairs(Farm_Path:GetChildren()) do
+				if Model and Model:FindFirstChild("MouseTarget") and Model:FindFirstChild("Properties") and Model:FindFirstChild("Properties"):FindFirstChild("Alive") and Model:FindFirstChild("Properties"):FindFirstChild("Alive").Value == true then
+
+					local Distance = (Humanoid_Root_Part.CFrame.Position - Model:FindFirstChild("MouseTarget").CFrame.Position).Magnitude
+
+					if Distance < Farm_Distance then
+						Farm_Distance = Distance
+						Closest_Model = Model
+					end
+
+				end
+			end
+
+			task.wait()
+
+			if Closest_Model ~= nil then
+
+				return Closest_Model
+
+			end
+
+		end
+
+		local function Calculate_Speed(Position_1, Position_2)
+
+			local Distance = (Position_1 - Position_2).Magnitude
+			Stop_Time = Distance / Speed_Offset
+
+			return Distance / Speed_Offset
+
+		end
+
+		local function Test()
+
+			local Model = Get_Closest()
+			local Mouse_Target = Model:FindFirstChild("MouseTarget")
+			local Alive_Bool = Model:FindFirstChild("Properties"):FindFirstChild("Alive")
+
+			local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Mouse_Target.CFrame.Position + Vector3.new(0, 2, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Mouse_Target.CFrame * CFrame.new(0, 2, 0)})
+			Tween_Character:Play()
+
+			task.spawn(function()
+				while Finished == false do
+					Platform.Position = Humanoid_Root_Part.CFrame.Position - Vector3.new(0, Platform_Offset, 0)
+					task.wait()
+				end
+			end)
+
+			task.wait(.5)
+			task.wait(Stop_Time)
+
+			Finished = true
+			Platform:Destroy()
+
+			keypress(0x45)
+
+			while Model and Alive_Bool and Alive_Bool.Value == true do
+				local args = {
+					[1] = "Action",
+				}
+				Gear_Event:InvokeServer(unpack(args))
+				task.wait(1.5)
+			end
+			
+			Farming = false
+
+		end
+		
+		Test()
+		
+	end
+	
+end
+
+--// AUTO FARM TAB //--
+
+local Auto_Farm_Tab = Window:NewTab("Auto Farm")
+
+local Auto_Farm_Settings = Auto_Farm_Tab:NewSection("Auto Farm Settings")
+
+Auto_Farm_Settings:NewDropdown("Auto Farm Location", "Defualt = Glade", {"Glade", "Maze"}, function(State)
+	Location = State
+end)
+
+Auto_Farm_Settings:NewDropdown("Auto Farm Item", "Defualt = Ores", {"Ores", "Trees", "Fish", "Ingredients"}, function(State)
+	Farm = State
+end)
+
+Auto_Farm_Settings:NewSlider("Auto Farm Speed", "Defualt = 70", 100, 1, function(State)
+	Speed_Offset = State
+end)
+
+local Auto_Farm_Main = Auto_Farm_Tab:NewSection("Auto Farm Main")
+
+Auto_Farm_Main:NewToggle("Toggle Auto Farm", "Starts The Auto Farm", function(State)
+	Farm_State = State
+	if State then
+		if Farming == true then
+			repeat task.wait(1) until Farming == false
+			if State then
+				Start_Auto_Farm()
+			end
+		else
+			Start_Auto_Farm()
+		end
+	end
+end)
+
+--// GENERAL FUNCTIONS & TABLES //--
+
+local function Create_Platform()
+	
+	local Platform = Instance.new("Part")
+	Platform.Color = Color3.fromRGB(255, 0, 0)
+	Platform.Transparency = .5
+	Platform.Name = tostring(math.random(1000000000,9999999999))
+	Platform.Size = Vector3.new(2048, .5, 2048)
+	Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
+	Platform.Anchored = true
+	Platform.Parent = Workspace_Service
+	
+	Platform_Name = Platform.Name
+	
+end
+
+local function Platty_Daddy(Position)
+	
+	local Part = Instance.new("Part")
+	Part.Color = Color3.fromRGB(0, 255, 85)
+	Part.Transparency = 0.5
+	Part.Name = tostring(math.random(1000000000,9999999999))
+	Part.Size = Vector3.new(2048,3,2048)
+	Part.Position = Position
+	Part.Anchored = true
+	Part.Parent = Workspace_Service
+	
+end
+
+--// GENERAL TAB //--
+
+local General_Tab = Window:NewTab("General")
+
+local General_Map = General_Tab:NewSection("Map")
+
+General_Map:NewButton("Event Fuck", "Removes Valentines Decorations", function()
+	game:GetService("Workspace").Valentines:Destroy()
+end)
+
+General_Map:NewButton("Glade Fuck", "Removes Glade Decorations", function()
+	game:GetService("Workspace").Map.Glade.Decoration:Destroy()
+end)
+
+local General_Platform = General_Tab:NewSection("Platform")
+
+General_Platform:NewButton("Create / Destroy Platform", "Huge Ass Client Side Platform", function()
+	
+	if Platform_Name ~= nil then
+		
+		local Platform = Workspace_Service:FindFirstChild(Platform_Name)
+		
+		if Platform.Transparency == .5 then
+			
+			Platform.Transparency = 1
+			Platform.CanCollide = false
+			
+		else
+			
+			if Humanoid and Humanoid.Health ~= 0 then
+				
+				Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
+				Platform.Transparency = .5
+				Platform.CanCollide = true
+				
+			end
+			
+		end
+		
+	else
+		
+		Create_Platform()
+		
+	end
+	
+end)
+
+General_Platform:NewButton("Platty Daddy", "Creates Platforms Under Map", function()
+	Platty_Daddy(Vector3.new(-1000 , -2.5, 0))
+	Platty_Daddy(Vector3.new(1000 , -2.5, 0))
+	Platty_Daddy(Vector3.new(0 , -2.5, -1000))
+	Platty_Daddy(Vector3.new(0 , -2.5, 1000))
+end)
+
+local General_Misc = General_Tab:NewSection("Misc")
+
+General_Misc:NewToggle("Uncap Max Zoom Distance", "Off = 50 | On = 100000", function(State)
+	if State then
+		Player.CameraMaxZoomDistance = 100000
+	else
+		Player.CameraMaxZoomDistance = 50
+	end
+end)
+
+--// SETTINGS TAB //--
+
+local Settings_Tab = Window:NewTab("Settings")
+
+local Settings_Main = Settings_Tab:NewSection("Main Settings")
+
+Settings_Main:NewKeybind("UI Toggle Keybind", "Sets A Keybind To Toggle UI", Enum.KeyCode.U, function()
+	Library:ToggleUI()
+end)
