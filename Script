@@ -311,24 +311,27 @@ end
 
 local function Teleport_Hitbox()
 	while Hitbox_Teleport_State do
+		print("1")
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
 		local Closest_Player = nil
 		local Closest_Distance = math.huge
-		for Index, Target in pairs(Players_Service:GetChildren()) do
-			local Target_Character = Target.Character
-			if Target.Name ~= Player.Name and Target_Character and Character:FindFirstChild("HumanoidRootPart") and Target_Character:FindFirstChild("Humanoid") and Target_Character:FindFirstChild("Humanoid").Health > 0 then
+		for _, Target in pairs(Players_Service:GetChildren()) do
+			print("2")
+			if Target ~= Player and Target.Character and Target.Character:FindFirstChild("HumanoidRootPart") and Target.Character:FindFirstChild("Humanoid") and Target.Character:FindFirstChild("Humanoid").Health > 0 then
+				print("3")
 				local Distance = (Humanoid_Root_Part.Position - Target.Character.HumanoidRootPart.Position).Magnitude
 				if Distance < Closest_Distance then
+					print("4")
 					Closest_Distance = Distance
 					Closest_Player = Target
 				end
 			end
 		end
 		if Closest_Player then
-			print("1")
+			print("5")
 			if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
-				print("2")
+				print("6")
 				Character.Gear.Damage.Position = Closest_Player.Character.HumanoidRootPart.Position
 			end
 		end
