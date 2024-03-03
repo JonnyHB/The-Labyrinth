@@ -338,7 +338,7 @@ PVP_Hitbox_Teleport:NewToggle("Show Hitbox", "Makes Weapon Hitbox Visible", func
 	else
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		if Character:FindFirstChild("Gear") then
-			Character.Gear.Damage.Transparency = .8
+			Character.Gear.Damage.Transparency = 1
 			for Index, Attachment in pairs(Character.Gear.Damage:GetChildren()) do
 				if Attachment.Name == "Dmg" then
 					Attachment.Visible = false
