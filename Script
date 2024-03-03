@@ -9,10 +9,6 @@ local Tween_Service = game:GetService("TweenService")
 local Workspace_Service = game:GetService("Workspace")
 local Replicated_Storage = game:GetService("ReplicatedStorage")
 
-if Replicated_Storage:FindFirstChild("Analytics") then
-	Replicated_Storage.Analytics:Destroy()
-end
-
 --// PLAYER VARIABLES //--
 
 local Player = Players_Service.LocalPlayer
@@ -25,19 +21,21 @@ local Window = Library.CreateLib("The Labyrinth | Fuck Script", "DarkTheme")
 
 --// LIBRARY DATA //--
 
-local Speed_Offset = 70
 local Platform_Offset = 3.3
+
+local Platform_Name = nil
 
 local Auto_Farm_State = false
 local Auto_Farming = false
 local Auto_Farm_Location = "Glade"
 local Auto_Farm_Item = "Ores"
-
-local Platform_Name = nil
+local Auto_Farm_Speed = 70
 
 local Auto_Heal_State = false
 local Auto_Heal_Fish = "Largemouth_Fish"
 local Auto_Heal_Threshold = 199
+
+local Show_Hitbox_State = false
 
 --// AUTO FARM FUNCTIONS & TABLES //--
 
@@ -111,9 +109,9 @@ local function Start_Auto_Farm()
 		local function Calculate_Speed(Position_1, Position_2)
 
 			local Distance = (Position_1 - Position_2).Magnitude
-			Stop_Time = Distance / Speed_Offset
+			Stop_Time = Distance / Auto_Farm_Speed
 
-			return Distance / Speed_Offset
+			return Distance / Auto_Farm_Speed
 
 		end
 
@@ -174,7 +172,7 @@ Auto_Farm_Settings:NewDropdown("Auto Farm Item", "Defualt = Ores", {"Ores", "Tre
 end)
 
 Auto_Farm_Settings:NewSlider("Auto Farm Speed", "Defualt = 70", 100, 1, function(State)
-	Speed_Offset = State
+	Auto_Farm_Speed = State
 end)
 
 local Auto_Farm_Main = Auto_Farm_Tab:NewSection("Auto Farm Main")
@@ -240,38 +238,24 @@ end)
 local General_Platform = General_Tab:NewSection("Platform")
 
 General_Platform:NewButton("Create / Destroy Platform", "Huge Ass Client Side Platform", function()
-	
 	local Character = Player.Character or Player.CharacterAdded:Wait()
 	local Humanoid = Character:WaitForChild("Humanoid")
 	local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
-
 	if Platform_Name ~= nil then
-
 		local Platform = Workspace_Service:FindFirstChild(Platform_Name)
-
 		if Platform.Transparency == .5 then
-
 			Platform.Transparency = 1
 			Platform.CanCollide = false
-
 		else
-
 			if Humanoid and Humanoid.Health ~= 0 then
-
 				Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
 				Platform.Transparency = .5
 				Platform.CanCollide = true
-
 			end
-
 		end
-
 	else
-
 		Create_Platform()
-
 	end
-
 end)
 
 General_Platform:NewButton("Platty Daddy", "Creates Platforms Under Map", function()
@@ -294,29 +278,34 @@ end)
 --// PVP FUNCTIONS & TABLES //--
 
 local function Start_Auto_Heal()
-	
 	local Inventory_Interaction_Event = Replicated_Storage.Resources.Data.Events.Traffic.InventoryInteraction
-	
 	while Auto_Heal_State do
-		
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		local Humanoid = Character:WaitForChild("Humanoid")
-		
 		if Humanoid.Health <= Auto_Heal_Threshold then
-			
 			local args = {
 				[1] = "Eat",
 				[2] = Auto_Heal_Fish
 			}
-
 			Inventory_Interaction_Event:InvokeServer(unpack(args))
-			
 		end
-		
 		task.wait()
-		
 	end
-	
+end
+
+local function Show_Hitbox()
+	while Show_Hitbox_State do
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		if Character:FindFirstChild("Gear") then
+			Character.Gear.Damage.Transparency = .8
+			for Index, Attachment in pairs(Character.Gear.Damage:GetChildren()) do
+				if Attachment.Name == "Dmg" then
+					Attachment.Visible = true
+				end
+			end
+		end
+		task.wait(1)
+	end
 end
 
 --// PVP TAB //--
@@ -343,18 +332,13 @@ end)
 local PVP_Hitbox_Teleport = PVP_Tab:NewSection("Hitbox Teleport")
 
 PVP_Hitbox_Teleport:NewToggle("Show Hitbox", "Makes Weapon Hitbox Visible", function(State)
-	local Character = Player.Character or Player.CharacterAdded:Wait()
-	if Character:FindFirstChild("Gear") then
-		if State then
-			Character.Gear.Damage.Transparency = .8
-			for Index, Attachment in pairs(Character.Gear.Damage) do
-				if Attachment.Name == "Dmg" then
-					Attachment.Visible = true
-				end
-			end
-		else
-			Character.Gear.Damage.Transparency = 1
-			for Index, Attachment in pairs(Character.Gear.Damage) do
+	Show_Hitbox_State = State
+	if State then
+		Show_Hitbox()
+	else
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		if Character:FindFirstChild("Gear") then
+			for Index, Attachment in pairs(Character.Gear.Damage:GetChildren()) do
 				if Attachment.Name == "Dmg" then
 					Attachment.Visible = false
 				end
