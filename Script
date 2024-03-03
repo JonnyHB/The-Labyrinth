@@ -328,13 +328,10 @@ end
 local function Teleport_Hitbox()
 	while Hitbox_Teleport_State do
 		local Closest_Player = Get_Closest_Player()
-		print(Get_Closest_Player())
 		if Closest_Player ~= nil then
-			print("step 1")
 			local Character = Player.Character or Player.CharacterAdded:Wait()
 			if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
-				print("step 2")
-				Character.Gear.Damage.CFrame = Closest_Player.Character.HumanoidRootPart.CFrame
+				Character.Gear.Damage.Position = Closest_Player.Character.HumanoidRootPart.Position
 			end
 		end
 		task.wait()
