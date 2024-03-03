@@ -9,9 +9,11 @@ local Tween_Service = game:GetService("TweenService")
 local Workspace_Service = game:GetService("Workspace")
 local Replicated_Storage = game:GetService("ReplicatedStorage")
 
---// PLAYER VARIABLES //--
+--// VARIABLES //--
 
 local Player = Players_Service.LocalPlayer
+
+local Gear_Event = Replicated_Storage.Resources.Data.Events.Traffic.Gear
 
 --// LIBRARY //--
 
@@ -36,6 +38,7 @@ local Auto_Heal_Fish = "Largemouth_Fish"
 local Auto_Heal_Threshold = 199
 
 local Show_Hitbox_State = false
+local Hitbox_Teleport_State = false
 
 --// AUTO FARM FUNCTIONS & TABLES //--
 
@@ -58,8 +61,6 @@ local function Start_Auto_Farm()
 		
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
-
-		local Gear_Event = Replicated_Storage.Resources.Data.Events.Traffic.Gear
 
 		local Farm_Path = Workspace_Service.Resources:FindFirstChild(Auto_Farm_Location):FindFirstChild(Auto_Farm_Item)
 
@@ -277,6 +278,22 @@ end)
 
 --// PVP FUNCTIONS & TABLES //--
 
+local function Get_Closest_Player()
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+	local Closest_Player = nil
+	local Closest_Distance = nil
+	for Index, Target in pairs(Players_Service:GetChildren()) do
+		if Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
+			local Distance = (Humanoid_Root_Part.CFrame.Position - Target.Character.HumanoidRootPart.CFrame.Position).Magnitude
+			if Distance < Closest_Distance then
+				Closest_Player = Target
+			end
+		end
+	end
+	return Closest_Player
+end
+
 local function Start_Auto_Heal()
 	local Inventory_Interaction_Event = Replicated_Storage.Resources.Data.Events.Traffic.InventoryInteraction
 	while Auto_Heal_State do
@@ -305,6 +322,19 @@ local function Show_Hitbox()
 			end
 		end
 		task.wait(1)
+	end
+end
+
+local function Teleport_Hitbox()
+	while Hitbox_Teleport_State do
+		local Closest_Player = Get_Closest_Player()
+		if Closest_Player ~= nil then
+			local Character = Player.Character or Player.CharacterAdded:Wait()
+			if Character:FindFirstChild("Gear") and Character.Gear:FindFirstChild("Gear"):FindFirstChild("Damage") then
+				Character.Gear.Damage.CFrame = Closest_Player.Character.HumanoidRootPart.CFrame
+			end
+		end
+		task.wait()
 	end
 end
 
@@ -344,6 +374,28 @@ PVP_Hitbox_Teleport:NewToggle("Show Hitbox", "Makes Weapon Hitbox Visible", func
 					Attachment.Visible = false
 				end
 			end
+		end
+	end
+end)
+
+PVP_Hitbox_Teleport:NewToggle("Teleport Hitbox To Closest Player", "Teleports Weapon Hitbox To Closest Player", function(State)
+	Hitbox_Teleport_State = State
+	if State then
+		Teleport_Hitbox()
+	else
+		task.wait()
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		if Character:FindFirstChild("Gear") and Character.Gear:FindFirstChild("Gear"):FindFirstChild("Damage") then
+			local args_1 = {
+				[1] = "UnEquip"
+			}
+			Gear_Event:InvokeServer(unpack(args_1))
+			task.wait(.5)
+			local args_2 = {
+				[1] = "Equip",
+				[3] = "Weapon"
+			}
+			Gear_Event:InvokeServer(unpack(args_2))
 		end
 	end
 end)
