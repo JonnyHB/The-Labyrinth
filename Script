@@ -285,10 +285,8 @@ local function Get_Closest_Player()
 	local Closest_Distance = math.huge
 	for Index, Target in pairs(Players_Service:GetChildren()) do
 		if Target.Name ~= Player.Name and Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
-			print("player checked")
 			local Distance = (Humanoid_Root_Part.Position - Target.Character.HumanoidRootPart.Position).Magnitude
 			if Distance < Closest_Distance then
-				print("found")
 				Closest_Player = Target
 			end
 		end
@@ -328,14 +326,14 @@ local function Show_Hitbox()
 end
 
 local function Teleport_Hitbox()
-	print("ran")
 	while Hitbox_Teleport_State do
 		local Closest_Player = Get_Closest_Player()
 		print(Get_Closest_Player())
 		if Closest_Player ~= nil then
+			print("step 1")
 			local Character = Player.Character or Player.CharacterAdded:Wait()
-			if Character:FindFirstChild("Gear") and Character.Gear:FindFirstChild("Gear"):FindFirstChild("Damage") then
-				print("done")
+			if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
+				print("step 2")
 				Character.Gear.Damage.CFrame = Closest_Player.Character.HumanoidRootPart.CFrame
 			end
 		end
@@ -390,7 +388,7 @@ PVP_Hitbox_Teleport:NewToggle("Teleport Hitbox To Closest Player", "Teleports We
 	else
 		task.wait()
 		local Character = Player.Character or Player.CharacterAdded:Wait()
-		if Character:FindFirstChild("Gear") and Character.Gear:FindFirstChild("Gear"):FindFirstChild("Damage") then
+		if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
 			local args_1 = {
 				[1] = "UnEquip"
 			}
