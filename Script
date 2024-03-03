@@ -326,8 +326,9 @@ local function Teleport_Hitbox()
 			end
 		end
 		if Closest_Player then
-			local Character = Player.Character or Player.CharacterAdded:Wait()
+			print("1")
 			if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
+				print("2")
 				Character.Gear.Damage.Position = Closest_Player.Character.HumanoidRootPart.Position
 			end
 		end
