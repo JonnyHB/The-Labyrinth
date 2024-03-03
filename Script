@@ -1,4 +1,7 @@
+
+
 print("The Labyrinth | Fuck Script")
+
 task.wait()
 
 --// SERVICES //--
@@ -11,9 +14,6 @@ local Replicated_Storage = game:GetService("ReplicatedStorage")
 --// PLAYER VARIABLES //--
 
 local Player = Players_Service.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
 
 --// LIBRARY //--
 
@@ -23,23 +23,27 @@ local Window = Library.CreateLib("The Labyrinth | Fuck Script", "DarkTheme")
 
 --// LIBRARY DATA //--
 
-local Location = "Glade"
-local Farm = "Ores"
-
 local Speed_Offset = 70
 local Platform_Offset = 3.3
 
-local Farm_State = false
-local Farming = false
+local Auto_Farm_State = false
+local Auto_Farming = false
+local Auto_Farm_Location = "Glade"
+local Auto_Farm_Item = "Ores"
 
 local Platform_Name = nil
 
+local Auto_Heal_State = false
+local Auto_Heal_Fish = "Largemouth_Fish"
+local Auto_Heal_Threshold = 190
+
 --// AUTO FARM FUNCTIONS & TABLES //--
+
 local function Start_Auto_Farm()
-	
-	while Farm_State do
-		
-		Farming = true
+
+	while Auto_Farm_State do
+
+		Auto_Farming = true
 
 		--// EMPTY VARIABLES //--
 
@@ -51,10 +55,13 @@ local function Start_Auto_Farm()
 		local Stop_Time
 
 		--// SCRIPT VARIABLES //--
+		
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
 
 		local Gear_Event = Replicated_Storage.Resources.Data.Events.Traffic.Gear
 
-		local Farm_Path = Workspace_Service.Resources:FindFirstChild(Location):FindFirstChild(Farm)
+		local Farm_Path = Workspace_Service.Resources:FindFirstChild(Auto_Farm_Location):FindFirstChild(Auto_Farm_Item)
 
 		local Finished = false
 
@@ -139,15 +146,15 @@ local function Start_Auto_Farm()
 				Gear_Event:InvokeServer(unpack(args))
 				task.wait(1.5)
 			end
-			
-			Farming = false
+
+			Auto_Farming = false
 
 		end
-		
+
 		Test()
-		
+
 	end
-	
+
 end
 
 --// AUTO FARM TAB //--
@@ -157,11 +164,11 @@ local Auto_Farm_Tab = Window:NewTab("Auto Farm")
 local Auto_Farm_Settings = Auto_Farm_Tab:NewSection("Auto Farm Settings")
 
 Auto_Farm_Settings:NewDropdown("Auto Farm Location", "Defualt = Glade", {"Glade", "Maze"}, function(State)
-	Location = State
+	Auto_Farm_Location = State
 end)
 
 Auto_Farm_Settings:NewDropdown("Auto Farm Item", "Defualt = Ores", {"Ores", "Trees", "Fish", "Ingredients"}, function(State)
-	Farm = State
+	Auto_Farm_Item = State
 end)
 
 Auto_Farm_Settings:NewSlider("Auto Farm Speed", "Defualt = 70", 100, 1, function(State)
@@ -171,10 +178,10 @@ end)
 local Auto_Farm_Main = Auto_Farm_Tab:NewSection("Auto Farm Main")
 
 Auto_Farm_Main:NewToggle("Toggle Auto Farm", "Starts The Auto Farm", function(State)
-	Farm_State = State
+	Auto_Farm_State = State
 	if State then
-		if Farming == true then
-			repeat task.wait(1) until Farming == false
+		if Auto_Farming == true then
+			repeat task.wait(1) until Auto_Farming == false
 			if State then
 				Start_Auto_Farm()
 			end
@@ -188,6 +195,10 @@ end)
 
 local function Create_Platform()
 	
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local Humanoid = Character:WaitForChild("Humanoid")
+	local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+
 	local Platform = Instance.new("Part")
 	Platform.Color = Color3.fromRGB(255, 0, 0)
 	Platform.Transparency = .5
@@ -196,13 +207,13 @@ local function Create_Platform()
 	Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
 	Platform.Anchored = true
 	Platform.Parent = Workspace_Service
-	
+
 	Platform_Name = Platform.Name
-	
+
 end
 
 local function Platty_Daddy(Position)
-	
+
 	local Part = Instance.new("Part")
 	Part.Color = Color3.fromRGB(0, 255, 85)
 	Part.Transparency = 0.5
@@ -211,7 +222,7 @@ local function Platty_Daddy(Position)
 	Part.Position = Position
 	Part.Anchored = true
 	Part.Parent = Workspace_Service
-	
+
 end
 
 --// GENERAL TAB //--
@@ -219,10 +230,6 @@ end
 local General_Tab = Window:NewTab("General")
 
 local General_Map = General_Tab:NewSection("Map")
-
-General_Map:NewButton("Event Fuck", "Removes Valentines Decorations", function()
-	game:GetService("Workspace").Valentines:Destroy()
-end)
 
 General_Map:NewButton("Glade Fuck", "Removes Glade Decorations", function()
 	game:GetService("Workspace").Map.Glade.Decoration:Destroy()
@@ -232,33 +239,37 @@ local General_Platform = General_Tab:NewSection("Platform")
 
 General_Platform:NewButton("Create / Destroy Platform", "Huge Ass Client Side Platform", function()
 	
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local Humanoid = Character:WaitForChild("Humanoid")
+	local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+
 	if Platform_Name ~= nil then
-		
+
 		local Platform = Workspace_Service:FindFirstChild(Platform_Name)
-		
+
 		if Platform.Transparency == .5 then
-			
+
 			Platform.Transparency = 1
 			Platform.CanCollide = false
-			
+
 		else
-			
+
 			if Humanoid and Humanoid.Health ~= 0 then
-				
+
 				Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
 				Platform.Transparency = .5
 				Platform.CanCollide = true
-				
+
 			end
-			
+
 		end
-		
+
 	else
-		
+
 		Create_Platform()
-		
+
 	end
-	
+
 end)
 
 General_Platform:NewButton("Platty Daddy", "Creates Platforms Under Map", function()
@@ -275,6 +286,55 @@ General_Misc:NewToggle("Uncap Max Zoom Distance", "Off = 50 | On = 100000", func
 		Player.CameraMaxZoomDistance = 100000
 	else
 		Player.CameraMaxZoomDistance = 50
+	end
+end)
+
+--// PVP FUNCTIONS & TABLES //--
+
+local function Start_Auto_Heal()
+	
+	local Inventory_Interaction_Event = Replicated_Storage.Resources.Data.Events.Traffic.InventoryInteraction
+	
+	while Auto_Heal_State do
+		
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		local Humanoid = Character:WaitForChild("Humanoid")
+		
+		if Humanoid.Health <= Auto_Heal_Threshold then
+			
+			local args = {
+				[1] = "Eat",
+				[2] = Auto_Heal_Fish
+			}
+
+			Inventory_Interaction_Event:InvokeServer(unpack(args))
+			
+		end
+		
+		task.wait()
+		
+	end
+	
+end
+
+--// PVP TAB //--
+
+local PVP_Tab = Window:NewTab("PVP")
+
+local PVP_Auto_Heal = PVP_Tab:NewSection("Auto Heal")
+
+PVP_Tab:NewDropdown("Auto Heal Fish", "Defualt = Largemouth_Fish", {"Largemouth_Fish", "Silverfin_Fish", "Glow_Fish", "Angel_Fish", "Skeleton_Fish", "Rainbow_Fish"}, function(State)
+	Auto_Heal_Fish = State
+end)
+
+PVP_Tab:NewSlider("Auto Heal Threshold", "Defualt = 199", 199, 1, function(State)
+	Auto_Heal_Threshold = State
+end)
+
+PVP_Tab:NewToggle("Auto Heal", "Auto Consume Fish", function(State)
+	Auto_Heal_State = State
+	if State then
+		Start_Auto_Heal()
 	end
 end)
 
