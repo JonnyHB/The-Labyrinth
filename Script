@@ -1,7 +1,5 @@
 
 
-print("The Labyrinth | Fuck Script")
-
 task.wait()
 
 --// SERVICES //--
@@ -10,6 +8,10 @@ local Players_Service = game:GetService("Players")
 local Tween_Service = game:GetService("TweenService")
 local Workspace_Service = game:GetService("Workspace")
 local Replicated_Storage = game:GetService("ReplicatedStorage")
+
+if Replicated_Storage:FindFirstChild("Analytics") then
+	Replicated_Storage.Analytics:Destroy()
+end
 
 --// PLAYER VARIABLES //--
 
@@ -35,7 +37,7 @@ local Platform_Name = nil
 
 local Auto_Heal_State = false
 local Auto_Heal_Fish = "Largemouth_Fish"
-local Auto_Heal_Threshold = 190
+local Auto_Heal_Threshold = 199
 
 --// AUTO FARM FUNCTIONS & TABLES //--
 
@@ -335,6 +337,29 @@ PVP_Auto_Heal:NewToggle("Auto Heal", "Auto Consume Fish", function(State)
 	Auto_Heal_State = State
 	if State then
 		Start_Auto_Heal()
+	end
+end)
+
+local PVP_Hitbox_Teleport = PVP_Tab:NewSection("Hitbox Teleport")
+
+PVP_Hitbox_Teleport:NewToggle("Show Hitbox", "Makes Weapon Hitbox Visible", function(State)
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	if Character:FindFirstChild("Gear") then
+		if State then
+			Character.Gear.Damage.Transparency = .8
+			for Index, Attachment in pairs(Character.Gear.Damage) do
+				if Attachment.Name == "Dmg" then
+					Attachment.Visible = true
+				end
+			end
+		else
+			Character.Gear.Damage.Transparency = 1
+			for Index, Attachment in pairs(Character.Gear.Damage) do
+				if Attachment.Name == "Dmg" then
+					Attachment.Visible = false
+				end
+			end
+		end
 	end
 end)
 
