@@ -234,11 +234,15 @@ local function Auto_Pickup()
 	while Auto_Pickup_State do
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+		local Pickup = false
 		for _, Item in pairs(Workspace_Service.Resources.LootDrops:GetChildren()) do
 			local Distance = (Humanoid_Root_Part.Position - Item.LootBeam.Position).Magnitude
 			if Distance < 10 then
-				keypress(0x45)
+				Pickup = true
 			end
+		end
+		if Pickup then
+			keypress(0x45)
 		end
 		task.wait(.1)
 	end
