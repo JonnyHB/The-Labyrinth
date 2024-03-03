@@ -389,17 +389,9 @@ PVP_Hitbox_Teleport:NewToggle("Teleport Hitbox To Closest Player", "Teleports We
 		task.wait()
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
-			local args_1 = {
-				[1] = "UnEquip"
-			}
-			Gear_Event:InvokeServer(unpack(args_1))
+			keypress(0x32)
 			task.wait(.5)
-			local args_2 = {
-				[1] = "Equip",
-				[3] = "Weapon"
-			}
-			Gear_Event:InvokeServer(unpack(args_2))
-			print("ended")
+			keypress(0x32)
 		end
 	end
 end)
