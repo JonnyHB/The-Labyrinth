@@ -284,9 +284,9 @@ local function Get_Closest_Player()
 	local Closest_Player = nil
 	local Closest_Distance = nil
 	for Index, Target in pairs(Players_Service:GetChildren()) do
-		if Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
+		if Target.Name ~= Player.Name and Target.Character and Target.Character.Humanoid and Target.Character.Humanoid.Health > 0 then
 			print("player checked")
-			local Distance = (Humanoid_Root_Part.CFrame.Position - Target.Character.HumanoidRootPart.CFrame.Position).Magnitude
+			local Distance = (Humanoid_Root_Part.Position - Target.Character.HumanoidRootPart.Position).Magnitude
 			if Distance < Closest_Distance then
 				print("found")
 				Closest_Player = Target
