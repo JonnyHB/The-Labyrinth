@@ -35,7 +35,7 @@ local Auto_Farm_Resource_Speed = 70
 
 local Auto_Farm_Boss_State = false
 local Auto_Farming_Boss = false
-local Auto_Farm_Boss = "StoneBoss"
+local Auto_Farm_Boss = "NormalBoss"
 local Auto_Farm_Boss_Distance = 20
 local Auto_Farm_Boss_Speed = 20
 local Auto_Farm_Boss_Offset = 0
@@ -187,7 +187,7 @@ local function Start_Boss_Auto_Farm()
 						if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
 							Character.Gear.Damage.Position = Boss.HumanoidRootPart.Position
 						end
-						task.wait()
+						task.wait(.1)
 					end
 					keypress(0x32)
 					task.wait(.5)
@@ -263,11 +263,11 @@ end)
 
 local Auto_Farm_Boss = Auto_Farm_Tab:NewSection("Auto Farm Boss")
 
-Auto_Farm_Boss:NewDropdown("Auto Farm Boss", "Defualt = StoneBoss", {"StoneBoss", "AcidBoss", "DragonBoss"}, function(State)
+Auto_Farm_Boss:NewDropdown("Auto Farm Boss", "Defualt = NormalBoss", {"NormalBoss", "AcidBoss", "DragonBoss"}, function(State)
 	Auto_Farm_Boss = State
 end)
 
-Auto_Farm_Boss:NewSlider("AUto Farm Speed", "Defualt = 20", 30, 1, function(State)
+Auto_Farm_Boss:NewSlider("Auto Farm Speed", "Defualt = 20", 30, 1, function(State)
 	Auto_Farm_Boss_Speed = State
 end)
 
