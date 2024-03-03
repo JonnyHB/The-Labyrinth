@@ -27,11 +27,18 @@ local Platform_Offset = 3.3
 
 local Platform_Name = nil
 
-local Auto_Farm_State = false
-local Auto_Farming = false
+local Auto_Farm_Resource_State = false
+local Auto_Farming_Resource = false
 local Auto_Farm_Location = "Glade"
 local Auto_Farm_Item = "Ores"
-local Auto_Farm_Speed = 70
+local Auto_Farm_Resource_Speed = 70
+
+local Auto_Farm_Boss_State = false
+local Auto_Farming_Boss = false
+local Auto_Farm_Boss = "StoneBoss"
+local Auto_Farm_Boss_Distance = 20
+local Auto_Farm_Boss_Speed = 20
+local Auto_Farm_Boss_Offset = 0
 
 local Auto_Heal_State = false
 local Auto_Heal_Fish = "Largemouth_Fish"
@@ -45,32 +52,17 @@ local Auto_Pickup_State = false
 
 --// AUTO FARM FUNCTIONS & TABLES //--
 
-local function Start_Auto_Farm()
-
-	while Auto_Farm_State do
-
-		Auto_Farming = true
-
-		--// EMPTY VARIABLES //--
-
+local function Start_Resource_Auto_Farm()
+	while Auto_Farm_Resource_State do
+		Auto_Farming_Resource = true
 		local CFrame_Character
 		local Vector_Character
-
 		local Vector_Platform
-
 		local Stop_Time
-
-		--// SCRIPT VARIABLES //--
-		
 		local Character = Player.Character or Player.CharacterAdded:Wait()
 		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
-
 		local Farm_Path = Workspace_Service.Resources:FindFirstChild(Auto_Farm_Location):FindFirstChild(Auto_Farm_Item)
-
 		local Finished = false
-
-		--// PLATFORM SETUP //--
-
 		local Platform = Instance.new("Part")
 		Platform.Color = Color3.fromRGB(255, 0, 0)
 		Platform.Transparency = .5
@@ -79,70 +71,45 @@ local function Start_Auto_Farm()
 		Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
 		Platform.Anchored = true
 		Platform.Parent = Workspace_Service
-
-		--// FUNCTIONS //--
-
 		local function Get_Closest()
-
 			local Farm_Distance = math.huge
 			local Closest_Model = nil
-
 			for i, Model in pairs(Farm_Path:GetChildren()) do
 				if Model and Model:FindFirstChild("MouseTarget") and Model:FindFirstChild("Properties") and Model:FindFirstChild("Properties"):FindFirstChild("Alive") and Model:FindFirstChild("Properties"):FindFirstChild("Alive").Value == true then
-
 					local Distance = (Humanoid_Root_Part.CFrame.Position - Model:FindFirstChild("MouseTarget").CFrame.Position).Magnitude
-
 					if Distance < Farm_Distance then
 						Farm_Distance = Distance
 						Closest_Model = Model
 					end
-
 				end
 			end
-
 			task.wait()
-
 			if Closest_Model ~= nil then
-
 				return Closest_Model
-
 			end
-
 		end
-
 		local function Calculate_Speed(Position_1, Position_2)
-
 			local Distance = (Position_1 - Position_2).Magnitude
-			Stop_Time = Distance / Auto_Farm_Speed
-
-			return Distance / Auto_Farm_Speed
-
+			Stop_Time = Distance / Auto_Farm_Resource_Speed
+			return Distance / Auto_Farm_Resource_Speed
 		end
-
-		local function Test()
-
+		local function Farm()
 			local Model = Get_Closest()
 			local Mouse_Target = Model:FindFirstChild("MouseTarget")
 			local Alive_Bool = Model:FindFirstChild("Properties"):FindFirstChild("Alive")
-
 			local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Mouse_Target.CFrame.Position + Vector3.new(0, 2, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Mouse_Target.CFrame * CFrame.new(0, 2, 0)})
 			Tween_Character:Play()
-
 			task.spawn(function()
 				while Finished == false do
 					Platform.Position = Humanoid_Root_Part.CFrame.Position - Vector3.new(0, Platform_Offset, 0)
 					task.wait()
 				end
 			end)
-
 			task.wait(.5)
 			task.wait(Stop_Time)
-
 			Finished = true
 			Platform:Destroy()
-
 			keypress(0x45)
-
 			while Model and Alive_Bool and Alive_Bool.Value == true do
 				local args = {
 					[1] = "Action",
@@ -150,47 +117,178 @@ local function Start_Auto_Farm()
 				Gear_Event:InvokeServer(unpack(args))
 				task.wait(1.5)
 			end
-
-			Auto_Farming = false
-
+			Auto_Farming_Resource = false
 		end
-
-		Test()
-
+		Farm()
 	end
+end
 
+local function Start_Boss_Auto_Farm()
+	
+	while Auto_Farm_Boss_State do
+		
+		Auto_Farming_Boss = true
+		
+		local Character = Player.Character or Player.CharacterAdded:Wait()
+		local Humanoid = Character:WaitForChild("Humanoid")
+		local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+		
+		if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
+			keypress(0x32)
+		else
+			keypress(0x32)
+			task.wait(.5)
+			keypress(0x32)
+		end
+		
+		if Workspace_Service.Map.Maze.Generated:FindFirstChild(Auto_Farm_Boss) then
+			
+			local Model = Workspace_Service.Map.Maze.Generated[Auto_Farm_Boss]
+			local Center = Model.Center
+			local Folder = Model.Objectives.Boss
+			
+			repeat task.wait(1) until (Humanoid_Root_Part.Position - Center.Position).Magnitude < 200
+			repeat task.wait(1) until Folder:FindFirstChild("Boss")
+			
+			local Boss = Folder.Boss
+			
+			if Boss.Humanoid.Health > 0 then
+				
+				local Finished = false
+
+				task.spawn(function()
+					while Finished == false do
+						local args = {
+							[1] = "Action",
+						}
+						Gear_Event:InvokeServer(unpack(args))
+						task.wait(.1)
+					end
+				end)
+				
+				local Platform = Instance.new("Part")
+				Platform.Color = Color3.fromRGB(255, 0, 0)
+				Platform.Transparency = .5
+				Platform.Name = tostring(math.random(1000000000,9999999999))
+				Platform.Size = Vector3.new(20, .5, 20)
+				Platform.Position = Humanoid_Root_Part.Position - Vector3.new(0, Platform_Offset, 0)
+				Platform.Anchored = true
+				Platform.Parent = Workspace_Service
+				
+				task.spawn(function()
+					while Finished == false do
+						Platform.Position = Humanoid_Root_Part.CFrame.Position - Vector3.new(0, Platform_Offset, 0)
+						task.wait()
+					end
+				end)
+
+				task.spawn(function()
+					while Finished == false do
+						if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
+							Character.Gear.Damage.Position = Boss.HumanoidRootPart.Position
+						end
+						task.wait()
+					end
+					keypress(0x32)
+					task.wait(.5)
+					keypress(0x32)
+				end)
+				
+				local function Calculate_Speed(Position_1, Position_2)
+					local Distance = (Position_1 - Position_2).Magnitude
+					return Distance / Auto_Farm_Boss_Speed
+				end
+				
+				while Boss.Humanoid.Health > 0 do
+					
+					local Boss_Position = Boss.HumanoidRootPart.Position
+					local Boss_Forward_Vector = Boss.HumanoidRootPart.LookVector
+					
+					local Target_Position = Boss_Position - Boss_Forward_Vector * Auto_Farm_Boss_Distance
+					
+					local Target_CFrame = CFrame.new(Target_Position)
+					
+					local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Target_Position + Vector3.new(0, Auto_Farm_Boss_Offset, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Target_CFrame * CFrame.new(0, Auto_Farm_Boss_Offset, 0)})
+					Tween_Character:Play()
+					
+					task.wait(.1)
+					
+					Tween_Character:Stop()
+					
+				end
+				
+				task.wait(3)
+				
+			end
+			
+		end
+		
+		Auto_Farming_Boss = false
+		
+	end
+	
 end
 
 --// AUTO FARM TAB //--
 
 local Auto_Farm_Tab = Window:NewTab("Auto Farm")
 
-local Auto_Farm_Settings = Auto_Farm_Tab:NewSection("Auto Farm Settings")
+local Auto_Farm_Resources = Auto_Farm_Tab:NewSection("Auto Farm Resources")
 
-Auto_Farm_Settings:NewDropdown("Auto Farm Location", "Defualt = Glade", {"Glade", "Maze"}, function(State)
+Auto_Farm_Resources:NewDropdown("Auto Farm Location", "Defualt = Glade", {"Glade", "Maze"}, function(State)
 	Auto_Farm_Location = State
 end)
 
-Auto_Farm_Settings:NewDropdown("Auto Farm Item", "Defualt = Ores", {"Ores", "Trees", "Fish", "Ingredients"}, function(State)
+Auto_Farm_Resources:NewDropdown("Auto Farm Item", "Defualt = Ores", {"Ores", "Trees", "Fish", "Ingredients"}, function(State)
 	Auto_Farm_Item = State
 end)
 
-Auto_Farm_Settings:NewSlider("Auto Farm Speed", "Defualt = 70", 100, 1, function(State)
-	Auto_Farm_Speed = State
+Auto_Farm_Resources:NewSlider("Auto Farm Speed", "Defualt = 70", 100, 1, function(State)
+	Auto_Farm_Resource_Speed = State
 end)
 
-local Auto_Farm_Main = Auto_Farm_Tab:NewSection("Auto Farm Main")
-
-Auto_Farm_Main:NewToggle("Toggle Auto Farm", "Starts The Auto Farm", function(State)
-	Auto_Farm_State = State
+Auto_Farm_Resources:NewToggle("Toggle Auto Farm", "Starts The Resource Auto Farm", function(State)
+	Auto_Farm_Resource_State = State
 	if State then
-		if Auto_Farming == true then
-			repeat task.wait(1) until Auto_Farming == false
+		if Auto_Farming_Resource == true then
+			repeat task.wait(1) until Auto_Farming_Resource == false
 			if State then
-				Start_Auto_Farm()
+				Start_Resource_Auto_Farm()
 			end
 		else
-			Start_Auto_Farm()
+			Start_Resource_Auto_Farm()
+		end
+	end
+end)
+
+local Auto_Farm_Boss = Auto_Farm_Tab:NewSection("Auto Farm Boss")
+
+Auto_Farm_Boss:NewDropdown("Auto Farm Boss", "Defualt = StoneBoss", {"StoneBoss", "AcidBoss", "DragonBoss"}, function(State)
+	Auto_Farm_Boss = State
+end)
+
+Auto_Farm_Boss:NewSlider("AUto Farm Speed", "Defualt = 20", 30, 1, function(State)
+	Auto_Farm_Boss_Speed = State
+end)
+
+Auto_Farm_Boss:NewSlider("Distance Offset", "Defualt = 20", 30, 1, function(State)
+	Auto_Farm_Boss_Distance = State
+end)
+
+Auto_Farm_Boss:NewSlider("Y Offset", "Defualt = 0", 20, 0, function(State)
+	Auto_Farm_Boss_Offset = State
+end)
+
+Auto_Farm_Boss:NewToggle("Toggle Auto Farm", "Starts The Boss Auto Farm", function(State)
+	Auto_Farm_Boss_State = State
+	if State then
+		if Auto_Farming_Boss == true then
+			repeat task.wait(1) until Auto_Farming_Boss == false
+			if State then
+				Start_Boss_Auto_Farm()
+			end
+		else
+			Start_Boss_Auto_Farm()
 		end
 	end
 end)
@@ -288,11 +386,13 @@ General_Misc:NewToggle("Uncap Max Zoom Distance", "Off = 50 | On = 100000", func
 	end
 end)
 
-General_Misc:NewToggle("Auto Pickup", "Will Spam E If Close To Loot Drop", function(State)
+local General_Auto_Pickup = General_Tab:NewSection("Auto Pickup")
+
+General_Auto_Pickup:NewToggle("Auto Pickup", "Will Spam E If Close To Loot Drop", function(State)
 	Auto_Pickup_Keybind = State
 end)
 
-General_Misc:NewKeybind("Auto Pickup Keybind", "Sets A Keybind To Auto Pickup", Enum.KeyCode.F1, function()
+General_Auto_Pickup:NewKeybind("Auto Pickup Keybind", "Sets A Keybind To Auto Pickup", Enum.KeyCode.F1, function()
 	if Auto_Pickup_Keybind then
 		Auto_Pickup_State = not Auto_Pickup_State
 		Auto_Pickup()
