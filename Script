@@ -323,15 +323,15 @@ local PVP_Tab = Window:NewTab("PVP")
 
 local PVP_Auto_Heal = PVP_Tab:NewSection("Auto Heal")
 
-PVP_Tab:NewDropdown("Auto Heal Fish", "Defualt = Largemouth_Fish", {"Largemouth_Fish", "Silverfin_Fish", "Glow_Fish", "Angel_Fish", "Skeleton_Fish", "Rainbow_Fish"}, function(State)
+PVP_Auto_Heal:NewDropdown("Auto Heal Fish", "Defualt = Largemouth_Fish", {"Largemouth_Fish", "Silverfin_Fish", "Glow_Fish", "Angel_Fish", "Skeleton_Fish", "Rainbow_Fish"}, function(State)
 	Auto_Heal_Fish = State
 end)
 
-PVP_Tab:NewSlider("Auto Heal Threshold", "Defualt = 199", 199, 1, function(State)
+PVP_Auto_Heal:NewSlider("Auto Heal Threshold", "Defualt = 199", 199, 1, function(State)
 	Auto_Heal_Threshold = State
 end)
 
-PVP_Tab:NewToggle("Auto Heal", "Auto Consume Fish", function(State)
+PVP_Auto_Heal:NewToggle("Auto Heal", "Auto Consume Fish", function(State)
 	Auto_Heal_State = State
 	if State then
 		Start_Auto_Heal()
