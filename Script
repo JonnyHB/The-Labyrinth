@@ -182,7 +182,6 @@ local function Start_Boss_Auto_Farm()
 					end
 				end)
 				
-				--[[
 				task.spawn(function()
 					while Finished == false do
 						if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
@@ -194,7 +193,6 @@ local function Start_Boss_Auto_Farm()
 					task.wait(.5)
 					keypress(0x32)
 				end)
-				]]
 				
 				local function Calculate_Speed(Position_1, Position_2)
 					local Distance = (Position_1 - Position_2).Magnitude
@@ -204,7 +202,7 @@ local function Start_Boss_Auto_Farm()
 				while Boss.Humanoid.Health > 0 do
 
 					local Boss_Position = Boss.HumanoidRootPart.Position
-					local Boss_Forward_Vector = Boss.HumanoidRootPart.LookVector
+					local Boss_Forward_Vector = Boss.HumanoidRootPart.CFrame.LookVector
 
 					local Target_Position = Boss_Position - Boss_Forward_Vector * Auto_Farm_Boss_Distance
 					local Target_CFrame = CFrame.new(Target_Position)
