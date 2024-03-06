@@ -199,6 +199,8 @@ local function Start_Boss_Auto_Farm()
 					return Distance / Auto_Farm_Boss_Speed
 				end
 				
+				--[[
+				
 				while Boss.Humanoid.Health > 0 do
 					
 					print("0")
@@ -224,7 +226,7 @@ local function Start_Boss_Auto_Farm()
 					
 					print("5")
 					
-					task.wait(1)
+					task.wait(.1)
 					
 					Tween_Character:Stop()
 					
@@ -233,6 +235,8 @@ local function Start_Boss_Auto_Farm()
 					print("6")
 					
 				end
+				
+				]]
 				
 				task.wait(3)
 				
