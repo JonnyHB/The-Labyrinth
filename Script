@@ -23,7 +23,7 @@ local Window = Library.CreateLib("The Labyrinth | Fuck Script", "DarkTheme")
 
 --// LIBRARY DATA //--
 
-local Platform_Offset = 3.3
+local Platform_Offset = 3.2
 
 local Platform_Name = nil
 
@@ -155,16 +155,6 @@ local function Start_Boss_Auto_Farm()
 			if Boss.Humanoid.Health > 0 then
 				
 				local Finished = false
-
-				task.spawn(function()
-					while Finished == false do
-						local args = {
-							[1] = "Action",
-						}
-						Gear_Event:InvokeServer(unpack(args))
-						task.wait(.1)
-					end
-				end)
 				
 				local Platform = Instance.new("Part")
 				Platform.Color = Color3.fromRGB(255, 0, 0)
@@ -182,6 +172,41 @@ local function Start_Boss_Auto_Farm()
 					end
 				end)
 				
+				task.spawn(function()
+					while Finished == false do
+						if Character:FindFirstChild("Gear") and Character:FindFirstChild("Gear"):FindFirstChild("Damage") then
+							Character.Gear.Damage.Position = Boss.HumanoidRootPart.Position
+						end
+						task.wait(.1)
+					end
+					keypress(0x32)
+					task.wait(.5)
+					keypress(0x32)
+				end)
+				
+				local function Calculate_Speed(Position_1, Position_2)
+					local Distance = (Position_1 - Position_2).Magnitude
+					return Distance / Auto_Farm_Boss_Speed
+				end
+
+				while Boss.Humanoid.Health > 0 do
+
+					local Boss_Position = Boss.HumanoidRootPart.Position
+					local Boss_Forward_Vector = Boss.HumanoidRootPart.CFrame.LookVector
+
+					local Target_Position = Boss_Position - Boss_Forward_Vector * Auto_Farm_Boss_Distance
+					local Target_CFrame = CFrame.new(Target_Position)
+
+					local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Target_Position + Vector3.new(0, Auto_Farm_Boss_Offset, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Target_CFrame * CFrame.new(0, Auto_Farm_Boss_Offset, 0)})
+					Tween_Character:Play()
+					
+					task.wait(.1)
+					
+					Tween_Character:Stop()
+					
+					task.wait()
+					
+				end
 
 				task.wait(3)
 				
