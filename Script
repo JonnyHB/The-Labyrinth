@@ -155,6 +155,16 @@ local function Start_Boss_Auto_Farm()
 			if Boss.Humanoid.Health > 0 then
 				
 				local Finished = false
+
+				task.spawn(function()
+					while Finished == false do
+						local args = {
+							[1] = "Action",
+						}
+						Gear_Event:InvokeServer(unpack(args))
+						task.wait(.1)
+					end
+				end)
 				
 				local Platform = Instance.new("Part")
 				Platform.Color = Color3.fromRGB(255, 0, 0)
