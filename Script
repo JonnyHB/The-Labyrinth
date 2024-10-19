@@ -94,7 +94,8 @@ local function Start_Resource_Auto_Farm()
 			return Distance / Auto_Farm_Resource_Speed
 		end
 		local function Farm()
-			local Model = Get_Closest()
+			local Model = nil
+			repeat Model = Get_Closest() until Model ~= nil
 			local Mouse_Target = Model:FindFirstChild("MouseTarget")
 			local Alive_Bool = Model:FindFirstChild("Properties"):FindFirstChild("Alive")
 			local Tween_Character = Tween_Service:Create(Humanoid_Root_Part, TweenInfo.new(Calculate_Speed(Humanoid_Root_Part.CFrame.Position, Mouse_Target.CFrame.Position + Vector3.new(0, 2, 0)), Enum.EasingStyle.Linear), {["CFrame"] = Mouse_Target.CFrame * CFrame.new(0, 2, 0)})
