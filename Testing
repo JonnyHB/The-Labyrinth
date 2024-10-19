@@ -57,9 +57,9 @@ local function Farm()
 	
 	if Alive_Bool and Alive_Bool.Value == true then
 		
-		local Old_Position = Humanoid_Root_Part.CFrame.Position
+		local Old_CFrame = Humanoid_Root_Part.CFrame.Position
 		
-		Humanoid_Root_Part.CFrame.Position = Mouse_Target.CFrame.Position
+		Humanoid_Root_Part.CFrame = Mouse_Target.CFrame * CFrame.new(0, 2, 0)
 		
 		local args_1 = {[1] = "Interaction",[2] = Model}
 		Item_Interaction_Event:InvokeServer(unpack(args_1))
@@ -75,7 +75,7 @@ local function Farm()
 		local args_4 = {[1] = "UnEquip"}
 		Gear_Event:InvokeServer(unpack(args_4))
 		
-		Humanoid_Root_Part.CFrame.Position = Old_Position
+		Humanoid_Root_Part.CFrame = Old_CFrame
 		
 	end
 	
