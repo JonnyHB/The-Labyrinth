@@ -1,35 +1,84 @@
-local Character = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+
+
+--// SERVICES //--
+
+local Players_Service = game:GetService("Players")
+local Workspace_Service = game:GetService("Workspace")
+local Replicated_Storage_Service = game:GetService("ReplicatedStorage")
+
+--// VARIABLES //--
+
+local Player = Players_Service.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid_Root_Part = Character:WaitForChild("HumanoidRootPart")
+
+local Gear_Event = Replicated_Storage_Service.Resources.Data.Events.Traffic.Gear
+local Item_Interaction_Event = Replicated_Storage_Service.Resources.Data.Events.Traffic.ItenInteraction
+local Stop_Resource_Event = Replicated_Storage_Service.Resources.Data.Events.Traffic.StopResource
+
+--// FUNCTIONS //--
+
 local function Get_Closest()
+	
 	local Farm_Distance = math.huge
+	
 	local Closest_Model = nil
+	
 	for i, Model in pairs(game:GetService("Workspace").Resources:FindFirstChild("Glade"):FindFirstChild("Ores"):GetChildren()) do
+		
 		if Model and Model:FindFirstChild("MouseTarget") and Model:FindFirstChild("Properties") and Model:FindFirstChild("Properties"):FindFirstChild("Alive") and Model:FindFirstChild("Properties"):FindFirstChild("Alive").Value == true then
+			
 			local Distance = (Humanoid_Root_Part.CFrame.Position - Model:FindFirstChild("MouseTarget").CFrame.Position).Magnitude
+			
 			if Distance < Farm_Distance then
+				
 				Farm_Distance = Distance
 				Closest_Model = Model
+				
 			end
+			
 		end
+		
 	end
+	
 	task.wait()
+	
 	return Closest_Model
+	
 end
-local Model = nil
-repeat Model = Get_Closest() until Model ~= nil
-local Mouse_Target = Model:FindFirstChild("MouseTarget")
-local Alive_Bool = Model:FindFirstChild("Properties"):FindFirstChild("Alive")
-if Alive_Bool and Alive_Bool.Value == true then
-	local Old_Position = Humanoid_Root_Part.CFrame.Position
-	Humanoid_Root_Part.CFrame.Position = Mouse_Target.CFrame.Position
-	local args_1 = {[1] = "Interaction",[2] = Model}
-	game:GetService("ReplicatedStorage").Resources.Data.Events.Traffic.ItemInteraction:InvokeServer(unpack(args_1))
-	local args_2 = {[1] = "Equip",[3] = "Pickaxe",[4] = Model}
-	game:GetService("ReplicatedStorage").Resources.Data.Events.Traffic.Gear:InvokeServer(unpack(args_2))
-	local args_3 = {[1] = "Action"}
-	game:GetService("ReplicatedStorage").Resources.Data.Events.Traffic.Gear:InvokeServer(unpack(args_3))
-	Stop_Resource_Event = game:GetService("ReplicatedStorage").Resources.Data.Events.Traffic.StopResource:FireServer()
-	local args_4 = {[1] = "UnEquip"}
-	game:GetService("ReplicatedStorage").Resources.Data.Events.Traffic.Gear:InvokeServer(unpack(args_4))
-	Humanoid_Root_Part.CFrame.Position = Old_Position
+
+local function Farm()
+	
+	local Model = nil
+	repeat Model = Get_Closest() until Model ~= nil
+	
+	local Mouse_Target = Model:FindFirstChild("MouseTarget")
+	local Alive_Bool = Model:FindFirstChild("Properties"):FindFirstChild("Alive")
+	
+	if Alive_Bool and Alive_Bool.Value == true then
+		
+		local Old_Position = Humanoid_Root_Part.CFrame.Position
+		
+		Humanoid_Root_Part.CFrame.Position = Mouse_Target.CFrame.Position
+		
+		local args_1 = {[1] = "Interaction",[2] = Model}
+		Item_Interaction_Event:InvokeServer(unpack(args_1))
+		
+		local args_2 = {[1] = "Equip",[3] = "Pickaxe",[4] = Model}
+		Gear_Event:InvokeServer(unpack(args_2))
+		
+		local args_3 = {[1] = "Action"}
+		Gear_Event:InvokeServer(unpack(args_3))
+		
+		Stop_Resource_Event:FireServer()
+		
+		local args_4 = {[1] = "UnEquip"}
+		Gear_Event:InvokeServer(unpack(args_4))
+		
+		Humanoid_Root_Part.CFrame.Position = Old_Position
+		
+	end
+	
 end
+
+Farm()
